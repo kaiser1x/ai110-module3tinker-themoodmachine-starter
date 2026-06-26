@@ -61,29 +61,93 @@ class MoodAnalyzer:
     # Scoring logic
     # ---------------------------------------------------------------------
 
+    # Negation words that flip the next sentiment word's value
+    NEGATION_WORDS = {
+        "not", "never", "no", "cant", "can't", "don't", "dont",
+        "won't", "wont", "isn't", "isnt", "hardly", "without",
+    }
+
+    # Emoji/slang tokens mapped to score values (positive > 0, negative < 0)
+    EMOJI_SCORES = {
+        ":)": 1, ":-)": 1, ":D": 2,
+        ":(": -1, ":-(": -1,
+        "😊": 1, "😍": 2, "🥳": 2, "😁": 1, "😄": 1,
+        "😢": -1, "😭": -2, "😤": -1, "😰": -1, "💀": -1,
+        "lol": 1, "lmao": 1, "haha": 1, "hehe": 1,
+        "ugh": -1, "smh": -1,
+        "thriving": 2, "vibing": 1, "highkey": 1, "lowkey": 0,
+    }
+
+    def _analyze(self, text: str):
+        """
+        Return (pos_count, neg_count) after applying negation and emoji/slang signals.
+
+        Negation flips a word's polarity: "not happy" adds to neg_count, not pos_count.
+        Emoji/slang values split by sign into the appropriate bucket.
+        """
+        tokens = self.preprocess(text)
+        pos_count = 0
+        neg_count = 0
+        negate_next = False
+
+        negate_window = 0
+        MAX_NEGATE_WINDOW = 2  # "not at all happy" — allow 2 filler words
+
+        for token in tokens:
+            if token in self.EMOJI_SCORES:
+                val = self.EMOJI_SCORES[token]
+                if negate_next and val != 0:
+                    val = -val
+                if val > 0:
+                    pos_count += val
+                elif val < 0:
+                    neg_count += abs(val)
+                negate_next = False
+                negate_window = 0
+                continue
+
+            clean = token.strip(".,!?;:'\"")
+
+            if clean in self.NEGATION_WORDS:
+                negate_next = True
+                negate_window = 0
+                continue
+
+            if clean in self.positive_words:
+                if negate_next:
+                    neg_count += 1
+                else:
+                    pos_count += 1
+                negate_next = False
+                negate_window = 0
+            elif clean in self.negative_words:
+                if negate_next:
+                    pos_count += 1
+                else:
+                    neg_count += 1
+                negate_next = False
+                negate_window = 0
+            else:
+                # Non-sentiment word: count toward negation window
+                if negate_next:
+                    negate_window += 1
+                    if negate_window > MAX_NEGATE_WINDOW:
+                        negate_next = False
+                        negate_window = 0
+
+        return pos_count, neg_count
+
     def score_text(self, text: str) -> int:
         """
-        Compute a numeric "mood score" for the given text.
+        Compute a numeric mood score: pos_count - neg_count.
 
-        Positive words increase the score.
-        Negative words decrease the score.
-
-        TODO: You must choose AT LEAST ONE modeling improvement to implement.
-        For example:
-          - Handle simple negation such as "not happy" or "not bad"
-          - Count how many times each word appears instead of just presence
-          - Give some words higher weights than others (for example "hate" < "annoyed")
-          - Treat emojis or slang (":)", "lol", "💀") as strong signals
+        Improvements over baseline:
+          1. Negation: "not happy" contributes -1 not +1
+          2. Emoji/slang signals via EMOJI_SCORES lookup
+          3. Repeated sentiment words accumulate (counted, not just presence)
         """
-        # TODO: Implement this method.
-        #   1. Call self.preprocess(text) to get tokens.
-        #   2. Loop over the tokens.
-        #   3. Increase the score for positive words, decrease for negative words.
-        #   4. Return the total score.
-        #
-        # Hint: if you implement negation, you may want to look at pairs of tokens,
-        # like ("not", "happy") or ("never", "fun").
-        pass
+        pos, neg = self._analyze(text)
+        return pos - neg
 
     # ---------------------------------------------------------------------
     # Label prediction
@@ -105,12 +169,16 @@ class MoodAnalyzer:
         Just remember that whatever labels you return should match the labels
         you use in TRUE_LABELS in dataset.py if you care about accuracy.
         """
-        # TODO: Implement this method.
-        #   1. Call self.score_text(text) to get the numeric score.
-        #   2. Return "positive" if the score is above 0.
-        #   3. Return "negative" if the score is below 0.
-        #   4. Return "neutral" otherwise.
-        pass
+        pos, neg = self._analyze(text)
+        score = pos - neg
+        if pos > 0 and neg > 0:
+            return "mixed"
+        elif score > 0:
+            return "positive"
+        elif score < 0:
+            return "negative"
+        else:
+            return "neutral"
 
     # ---------------------------------------------------------------------
     # Explanations (optional but recommended)
