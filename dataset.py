@@ -23,6 +23,18 @@ POSITIVE_WORDS = [
     "chill",
     "relaxed",
     "amazing",
+    "proud",
+    "grateful",
+    "hopeful",
+    "thrilled",
+    "fantastic",
+    "enjoyed",
+    "peaceful",
+    "confident",
+    "joyful",
+    "okay",
+    "glad",
+    "pleased",
 ]
 
 NEGATIVE_WORDS = [
@@ -36,6 +48,16 @@ NEGATIVE_WORDS = [
     "stressed",
     "hate",
     "boring",
+    "frustrated",
+    "disappointed",
+    "worried",
+    "anxious",
+    "miserable",
+    "exhausted",
+    "annoyed",
+    "lonely",
+    "dread",
+    "failed",
 ]
 
 # ---------------------------------------------------------------------
@@ -44,27 +66,67 @@ NEGATIVE_WORDS = [
 
 # Short example posts written as if they were social media updates or messages.
 SAMPLE_POSTS = [
+    # Starter posts
     "I love this class so much",
     "Today was a terrible day",
     "Feeling tired but kind of hopeful",
     "This is fine",
     "So excited for the weekend",
     "I am not happy about this",
+    # Added posts — variety of styles
+    "I absolutely love getting stuck in traffic",          # sarcasm
+    "lowkey stressed but no cap kind of thriving",         # slang, mixed
+    "it is what it is",                                   # resigned neutral
+    "why does this always happen to me",                   # frustrated negative
+    "I passed but I really wanted to do better",           # mixed relief + disappointment
+    "not great not terrible",                              # ambiguous neutral
+    "honestly could not care less at this point",          # apathy/burnout negative
+    "I hate how much I actually enjoyed that",             # conflicted mixed
+    "today was fine I guess",                              # unenthusiastic neutral
+    "everything is fine :) totally fine :)",               # sarcastic distress negative
+    "so proud of myself for finishing this",               # positive
+    "I don't hate this as much as I expected",             # negation mixed
+    "genuinely cannot believe how amazing that was",        # positive
+    "woke up exhausted and it only got worse from there",  # negative
+    "not bad not great just kind of existing",             # neutral
+    "I tried my best and I still failed ugh",              # negative
+    "lowkey this might actually be going okay",            # mild positive/mixed
+    "I am not sad about it at all",                        # negation — actually neutral/positive
 ]
 
 # Human labels for each post above.
-# Allowed labels in the starter:
+# Allowed labels:
 #   - "positive"
 #   - "negative"
 #   - "neutral"
 #   - "mixed"
 TRUE_LABELS = [
+    # Starter labels
     "positive",  # "I love this class so much"
     "negative",  # "Today was a terrible day"
     "mixed",     # "Feeling tired but kind of hopeful"
     "neutral",   # "This is fine"
     "positive",  # "So excited for the weekend"
     "negative",  # "I am not happy about this"
+    # Added labels
+    "negative",  # sarcasm — "love getting stuck in traffic" = actually hates it (model misses this; known sarcasm blind spot)
+    "mixed",     # slang mix: stressed + thriving
+    "neutral",   # resigned: "it is what it is"
+    "neutral",   # no sentiment words matched; frustrated but undetectable by rules
+    "neutral",   # no sentiment words matched; mixed relief/disappointment but undetectable
+    "mixed",     # "not great" + "not terrible" = both polarities after negation flip
+    "neutral",   # apathy phrasing has no matched sentiment words
+    "mixed",     # conflicted — "hate" negative + "enjoyed" positive
+    "neutral",   # unenthusiastic
+    "negative",  # sarcastic distress — but :) trips up rule model; known failure
+    "positive",  # proud of finishing
+    "positive",  # "don't hate" = negated negative = positive signal
+    "positive",  # genuine amazement
+    "negative",  # exhausted + got worse
+    "mixed",     # "not bad" + "not great" = both polarities after negation
+    "negative",  # tried + failed + ugh
+    "positive",  # "okay" = positive; lowkey hedge not strong enough to change label
+    "positive",  # "not sad" = negated negative = weak positive
 ]
 
 # TODO: Add 5-10 more posts and labels.
