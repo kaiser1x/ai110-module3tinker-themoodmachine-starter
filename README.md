@@ -65,3 +65,9 @@ During this lab you will:
 - When debugging, print tokens, scores, or intermediate choices.
 - Ask an AI assistant to help create edge case posts or unusual wording.
 - Try examples that mislead or confuse your model. Failure cases teach you the most.
+
+---
+
+## Instructor Summary
+
+The core concept students need to understand is that rule-based classifiers are only as good as the rules and data behind them — the model does not "understand" language, it just pattern-matches against word lists, so its behavior is fully determined by those design choices. Students most commonly struggle with negation logic ("not happy" should score negative, not positive) and with sarcasm, where the literal words contradict the intended meaning and no rule-based system handles it cleanly. AI assistants are genuinely helpful for generating diverse test posts, suggesting slang or emoji examples, and explaining why a score came out a certain way — but they can mislead students into copying word lists or threshold values without understanding why, which undercuts the lab's goal of building that intuition from scratch. AI also tends to overexplain negation handling in ways that skip the student's own discovery moment. To guide a stuck student without giving the answer, ask: "Print out the tokens your model sees for that sentence — do any of them appear in your positive or negative word lists?" That one question usually surfaces whether the issue is preprocessing, missing vocabulary, or a negation window problem, and lets the student diagnose it themselves.
